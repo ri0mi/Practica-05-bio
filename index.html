@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboratorio Bioinformático de Cultivo</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ===================== BARRA SUPERIOR ===================== -->
+<header id="barra">
+    <div id="marca">
+        <span id="logo">🌱</span>
+        <div>
+            <h1>Laboratorio Bioinformático de Cultivo</h1>
+            <p>Práctica 05 · Three.js + FlightPHP + MySQL · Ricardo Melgoza y Rebeca Arciga</p>
+        </div>
+    </div>
+
+    <nav id="pestanas">
+        <button class="pestana activa" data-vista="simulador">Simulador</button>
+        <button class="pestana" data-vista="comparar">Comparar A/B</button>
+        <button class="pestana" data-vista="historial">Historial</button>
+        <button class="pestana" data-vista="reportes">Reportes</button>
+    </nav>
+
+    <div id="estado-api" class="chip">Conectando…</div>
+</header>
+
+<!-- ===================== VISTA LABORATORIO ===================== -->
+<main id="vista-simulador" class="vista activa">
+
+    <!-- Columna izquierda: configuración -->
+    <aside class="panel" id="col-config">
+        <h2>Configuración</h2>
+
+        <label class="campo">
+            <span>Especie</span>
+            <select id="sel-especie"></select>
+        </label>
+        <p id="ficha-especie" class="nota">—</p>
+
+        <label class="campo">
+            <span>Modelo de crecimiento</span>
+            <select id="sel-modelo">
+                <option value="logistico">Logístico (Verhulst)</option>
+                <option value="gompertz">Gompertz</option>
+                <option value="exponencial">Exponencial</option>
+                <option value="lineal">Lineal</option>
+            </select>
+        </label>
+        <p id="formula-modelo" class="nota mono">—</p>
+
+        <h3>Parámetros genéticos</h3>
+        <label class="campo deslizador">
+            <span>Tasa r <b id="v-r">0.150</b></span>
+            <input type="range" id="in-r" min="0.02" max="0.40" step="0.005" value="0.15">
+        </label>
+        <label class="campo deslizador">
+            <span>Capacidad K <b id="v-k">420</b> g</span>
+            <input type="range" id="in-k" min="10" max="600" step="5" value="420">
+        </label>
+        <label class="campo deslizador">
+            <span>Ciclo <b id="v-dias">110</b> días</span>
+            <input type="range" id="in-dias" min="20" max="200" step="5" value="110">
+        </label>
+
+        <h3>Condiciones ambientales</h3>
+        <label class="campo deslizador">
+            <span>Luz <b id="v-luz">85</b> %</span>
+            <input type="range" id="in-luz" min="0" max="100" step="1" value="85">
+        </label>
+        <label class="campo deslizador">
+            <span>Agua <b id="v-agua">75</b> %</span>
+            <input type="range" id="in-agua" min="0" max="100" step="1" value="75">
+        </label>
+        <label class="campo deslizador">
+            <span>Temperatura <b id="v-temp">23</b> °C</span>
+            <input type="range" id="in-temp" min="0" max="45" step="0.5" value="23">
+        </label>
+        <label class="campo deslizador">
+            <span>Nutrientes <b id="v-nutri">85</b> %</span>
+            <input type="range" id="in-nutri" min="0" max="100" step="1" value="85">
+        </label>
+        <label class="campo deslizador">
+            <span>CO₂ <b id="v-co2">450</b> ppm</span>
+            <input type="range" id="in-co2" min="200" max="900" step="10" value="450">
+        </label>
+
+        <h3>Parcela</h3>
+        <label class="campo deslizador">
+            <span>Macetas <b id="v-macetas">1</b></span>
+            <input type="range" id="in-macetas" min="1" max="4" step="1" value="1">
+        </label>
+        <p class="nota">Repite el mismo ejemplar. El modelo es por planta: no se simula competencia entre vecinas.</p>
+
+        <div class="botones">
+            <button id="btn-optimo" class="secundario">Usar óptimo de la especie</button>
+            <button id="btn-simular" class="primario">▶ Ejecutar simulación</button>
+        </div>
+
+        <h3>Escenarios</h3>
+        <div class="botones dos">
+            <button id="btn-slot-a" class="secundario">Fijar como A</button>
+            <button id="btn-slot-b" class="secundario">Fijar como B</button>
+        </div>
+
+        <h3>Guardar</h3>
+        <label class="campo">
+            <span>Nombre de la corrida</span>
+            <input type="text" id="in-nombre" placeholder="Tomate · riego óptimo">
+        </label>
+        <label class="campo">
+            <span>Notas</span>
+            <textarea id="in-notas" rows="2" placeholder="Qué estás probando"></textarea>
+        </label>
+        <button id="btn-guardar" class="primario ancho">💾 Guardar en MySQL</button>
+        <p id="msg-guardar" class="nota"></p>
+    </aside>
+
+    <!-- Centro: escena 3D (se muda a la vista Comparar y vuelve) -->
+    <div id="col-escena-destino">
+    <section id="col-escena">
+        <canvas id="lienzo"></canvas>
+
+        <div id="hud">
+            <div id="hud-dia">Día 0</div>
+            <div id="hud-barra"><div id="hud-relleno"></div></div>
+            <div id="hud-pct">0 %</div>
+        </div>
+
+        <div id="controles-reproduccion">
+            <button id="btn-play" class="mini">⏸</button>
+            <label class="mini-campo">
+                Velocidad <b id="v-vel">8</b> días/s
+                <input type="range" id="in-vel" min="1" max="60" step="1" value="8">
+            </label>
+            <button id="btn-reset-cam" class="mini">🔄 Cámara</button>
+        </div>
+
+        <div id="panel-parte" class="flotante oculto">
+            <h3 id="parte-nombre">—</h3>
+            <dl>
+                <dt>Geometría</dt><dd id="parte-geo">—</dd>
+                <dt>Crecimiento</dt><dd id="parte-crec">—</dd>
+                <dt>Altura sobre el suelo</dt><dd id="parte-altura">—</dd>
+                <dt>Estrés asociado</dt><dd id="parte-estres">—</dd>
+                <dt>Aporte a la biomasa</dt><dd id="parte-biomasa">—</dd>
+                <dt>Especie</dt><dd id="parte-especie">—</dd>
+            </dl>
+            <p id="parte-funcion" class="nota">—</p>
+        </div>
+    </section>
+    </div>
+
+    <!-- Columna derecha: KPIs y decisiones -->
+    <aside class="panel" id="col-kpis">
+        <h2>Indicadores</h2>
+
+        <div class="kpis">
+            <div class="kpi"><span>Día</span><b id="kpi-dia">0</b></div>
+            <div class="kpi"><span>Biomasa</span><b id="kpi-biomasa">0 g</b></div>
+            <div class="kpi"><span>Altura</span><b id="kpi-altura">0 u</b></div>
+            <div class="kpi"><span>Hojas</span><b id="kpi-hojas">0</b></div>
+            <div class="kpi"><span>Ramas</span><b id="kpi-ramas">0</b></div>
+            <div class="kpi"><span>ICR</span><b id="kpi-icr">0</b></div>
+        </div>
+
+        <div class="kpis dos-col">
+            <div class="kpi ancho2"><span>Estrés total</span><b id="kpi-estres">0 / 100</b></div>
+            <div class="kpi ancho2"><span>Predicción de cosecha</span><b id="kpi-cosecha">—</b></div>
+            <div class="kpi ancho2"><span>Biomasa de la parcela</span><b id="kpi-parcela">— una sola maceta</b></div>
+        </div>
+
+        <h2>Próxima acción</h2>
+        <div id="accion" class="aviso info">Ejecuta una simulación para empezar.</div>
+
+        <h2>Decisiones del motor</h2>
+        <div id="lista-decisiones" class="lista"></div>
+    </aside>
+
+    <!-- Gráficas -->
+    <section id="fila-graficas">
+        <div class="panel grafica">
+            <canvas id="g-biomasa"></canvas>
+            <button id="btn-tabla" class="mini alineado">Ver tabla de datos</button>
+            <div id="tabla-mediciones" class="scroll oculto"></div>
+        </div>
+        <div class="panel grafica estrecha">
+            <canvas id="g-estres"></canvas>
+        </div>
+    </section>
+</main>
+
+<!-- ===================== VISTA COMPARAR ===================== -->
+<main id="vista-comparar" class="vista">
+    <div class="panel ancho-total">
+        <h2>Comparación de escenarios A / B</h2>
+        <p class="nota">
+            Fija dos configuraciones desde el simulador con los botones
+            <b>Fijar como A</b> y <b>Fijar como B</b>. Aquí se contrastan y el
+            motor emite un veredicto.
+        </p>
+
+        <div id="veredicto" class="aviso info">Aún no hay dos escenarios fijados.</div>
+
+        <div id="tarjetas-ab" class="tarjetas"></div>
+
+        <!-- La escena 3D se muda aquí al entrar en esta vista: un solo canvas
+             y un solo contexto WebGL para toda la aplicación. -->
+        <div id="slot-escena-comparar"></div>
+
+        <div class="panel grafica alto">
+            <canvas id="g-comparar"></canvas>
+        </div>
+    </div>
+</main>
+
+<!-- ===================== VISTA HISTORIAL ===================== -->
+<main id="vista-historial" class="vista">
+    <div class="panel ancho-total">
+        <h2>Historial de simulaciones</h2>
+        <p class="nota">Cada corrida guardada en MySQL con su configuración y sus resultados.</p>
+        <div id="tabla-historial" class="scroll"></div>
+    </div>
+</main>
+
+<!-- ===================== VISTA REPORTES ===================== -->
+<main id="vista-reportes" class="vista">
+    <div class="panel ancho-total">
+        <h2>Reportes de analítica</h2>
+
+        <div id="resumen-global" class="kpis seis"></div>
+
+        <h3>Top 5 simulaciones por biomasa</h3>
+        <div id="tabla-top" class="scroll"></div>
+
+        <h3>Eficiencia por especie</h3>
+        <p class="nota">Biomasa producida por día de cultivo, promediada entre las corridas de cada especie.</p>
+        <div id="tabla-eficiencia" class="scroll"></div>
+
+        <h3>Alertas registradas</h3>
+        <div id="lista-alertas" class="lista"></div>
+    </div>
+</main>
+
+<!-- ===================== LIBRERÍAS ===================== -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+
+<!-- ===================== CÓDIGO DEL PROYECTO ===================== -->
+<script src="js/api.js"></script>
+<script src="js/modelos.js"></script>
+<script src="js/motor.js"></script>
+<script src="js/escena.js"></script>
+<script src="js/graficas.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>

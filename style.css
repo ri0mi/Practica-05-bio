@@ -1,0 +1,300 @@
+/* ==========================================================================
+   LABORATORIO BIOINFORMÁTICO DE CULTIVO
+   ========================================================================== */
+
+:root {
+    --fondo:       #0d1117;
+    --panel:       #161b22;
+    --panel-alto:  #1c232c;
+    --borde:       #2a3340;
+    --tinta:       #c9d1d9;
+    --tinta-fuerte:#e6edf3;
+    --tenue:       #8b98a5;
+    --acento:      #3fb950;
+    --acento-sec:  #3987e5;
+
+    --bien:        #0ca30c;
+    --aviso:       #fab219;
+    --critico:     #d03b3b;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: system-ui, "Segoe UI", Arial, sans-serif;
+    background: var(--fondo);
+    color: var(--tinta);
+    font-size: 14px;
+    min-height: 100vh;
+}
+
+h1 { font-size: 15px; color: var(--tinta-fuerte); }
+h2 {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 1px;
+    color: var(--acento); margin: 18px 0 10px;
+}
+h2:first-child { margin-top: 0; }
+h3 {
+    font-size: 11px; text-transform: uppercase; letter-spacing: .8px;
+    color: var(--tenue); margin: 16px 0 8px;
+}
+
+.nota { font-size: 11.5px; color: var(--tenue); line-height: 1.5; }
+.mono { font-family: "Courier New", monospace; }
+.oculto { display: none !important; }
+
+/* ---------- Barra superior ---------- */
+#barra {
+    display: flex; align-items: center; gap: 20px;
+    padding: 10px 18px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--borde);
+    position: sticky; top: 0; z-index: 50;
+}
+
+#marca { display: flex; align-items: center; gap: 10px; }
+#logo { font-size: 22px; }
+#marca p { font-size: 11px; color: var(--tenue); margin-top: 2px; }
+
+#pestanas { display: flex; gap: 4px; margin-left: auto; }
+
+.pestana {
+    padding: 7px 14px; font-size: 13px; font-family: inherit;
+    color: var(--tinta); background: transparent;
+    border: 1px solid transparent; border-radius: 7px; cursor: pointer;
+}
+.pestana:hover { background: var(--panel-alto); }
+.pestana.activa { background: var(--panel-alto); border-color: var(--acento); color: var(--tinta-fuerte); }
+
+.chip {
+    padding: 4px 10px; font-size: 11px; border-radius: 20px;
+    background: var(--panel-alto); border: 1px solid var(--borde); color: var(--tenue);
+    white-space: nowrap;
+}
+.chip.ok    { border-color: var(--bien);    color: #7ee07e; }
+.chip.error { border-color: var(--critico); color: #ff8d8d; }
+
+/* ---------- Vistas ---------- */
+.vista { display: none; padding: 14px; }
+.vista.activa { display: grid; }
+
+#vista-simulador {
+    grid-template-columns: 290px minmax(0, 1fr) 290px;
+    grid-template-rows: minmax(380px, 1fr) auto;
+    grid-template-areas:
+        "config escena kpis"
+        "graficas graficas graficas";
+    gap: 12px;
+    align-items: start;
+}
+
+#col-config   { grid-area: config; max-height: calc(100vh - 110px); overflow-y: auto; }
+#col-escena-destino { grid-area: escena; min-height: 400px; }
+#col-escena   { position: relative; display: flex; flex-direction: column; height: 100%; }
+#col-kpis     { grid-area: kpis;   max-height: calc(100vh - 110px); overflow-y: auto; }
+#fila-graficas{ grid-area: graficas; display: grid; grid-template-columns: 2fr 1fr; gap: 12px; }
+
+.panel {
+    background: var(--panel);
+    border: 1px solid var(--borde);
+    border-radius: 10px;
+    padding: 14px;
+}
+
+.ancho-total { width: 100%; }
+
+/* ---------- Formularios ---------- */
+.campo { display: block; margin-bottom: 10px; }
+.campo > span {
+    display: block; font-size: 11.5px; color: var(--tenue); margin-bottom: 4px;
+}
+.campo b { color: var(--tinta-fuerte); font-variant-numeric: tabular-nums; }
+
+select, input[type="text"], textarea {
+    width: 100%; padding: 7px 8px;
+    font-family: inherit; font-size: 13px;
+    color: var(--tinta); background: var(--panel-alto);
+    border: 1px solid var(--borde); border-radius: 6px;
+}
+select:focus, input:focus, textarea:focus { outline: 1px solid var(--acento-sec); }
+
+input[type="range"] {
+    width: 100%; accent-color: var(--acento); margin-top: 2px;
+}
+
+button {
+    font-family: inherit; font-size: 13px; cursor: pointer;
+    border-radius: 7px; padding: 8px 12px;
+    border: 1px solid var(--borde);
+    background: var(--panel-alto); color: var(--tinta);
+}
+button:hover { border-color: var(--acento); }
+
+.primario { background: #1f6f33; border-color: #2a8f43; color: #eafbee; font-weight: 600; }
+.primario:hover { background: #26873d; }
+.secundario { font-size: 12px; }
+.ancho { width: 100%; }
+
+.botones { display: flex; gap: 8px; flex-direction: column; margin-top: 12px; }
+.botones.dos { flex-direction: row; }
+.botones.dos button { flex: 1; }
+
+.mini { font-size: 11.5px; padding: 5px 9px; }
+.mini.alineado { margin-top: 8px; }
+.mini-campo { font-size: 11px; color: var(--tenue); display: flex; align-items: center; gap: 6px; }
+.mini-campo input { width: 110px; }
+
+/* ---------- Escena ---------- */
+#lienzo {
+    width: 100%; flex: 1; min-height: 340px;
+    display: block; border-radius: 10px;
+    border: 1px solid var(--borde);
+    background: #11161c; cursor: grab;
+}
+#lienzo:active { cursor: grabbing; }
+
+#hud {
+    position: absolute; top: 12px; left: 14px; right: 14px;
+    display: flex; align-items: center; gap: 10px;
+    font-size: 11px; color: var(--tinta);
+    pointer-events: none;
+    text-shadow: 0 1px 4px rgba(0,0,0,.8);
+}
+#hud-dia { font-weight: 700; min-width: 54px; }
+#hud-barra {
+    flex: 1; height: 5px; border-radius: 3px;
+    background: rgba(255,255,255,.14);
+    border: 1px solid rgba(255,255,255,.22);
+}
+#hud-relleno { width: 0%; height: 100%; background: var(--acento); border-radius: 3px; }
+#hud-pct { min-width: 40px; text-align: right; font-variant-numeric: tabular-nums; }
+
+#controles-reproduccion {
+    display: flex; align-items: center; gap: 12px;
+    margin-top: 8px; padding: 6px 2px;
+}
+
+.flotante {
+    position: absolute; bottom: 58px; left: 14px;
+    width: 250px; padding: 12px;
+    background: rgba(13,17,23,.94);
+    border: 1px solid var(--borde); border-radius: 9px;
+}
+.flotante h3 { color: var(--acento); margin: 0 0 8px; font-size: 12px; }
+.flotante dl { display: grid; grid-template-columns: auto 1fr; gap: 3px 8px; font-size: 11.5px; }
+.flotante dt { color: var(--tenue); }
+.flotante dd { color: var(--tinta-fuerte); text-align: right; font-variant-numeric: tabular-nums; }
+.flotante .nota { margin-top: 8px; border-top: 1px solid var(--borde); padding-top: 8px; }
+
+/* ---------- KPIs ---------- */
+.kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.kpis.seis { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+.kpis.dos-col { margin-top: 8px; grid-template-columns: 1fr; }
+
+.kpi {
+    background: var(--panel-alto); border: 1px solid var(--borde);
+    border-radius: 8px; padding: 9px 10px;
+}
+.kpi span { display: block; font-size: 10px; text-transform: uppercase;
+            letter-spacing: .6px; color: var(--tenue); }
+.kpi b { display: block; font-size: 17px; color: var(--tinta-fuerte);
+         margin-top: 3px; font-variant-numeric: tabular-nums; }
+.kpi.ancho2 b { font-size: 14px; }
+
+/* ---------- Avisos y listas ---------- */
+.aviso {
+    padding: 10px 12px; border-radius: 8px; font-size: 12.5px; line-height: 1.5;
+    border-left: 3px solid var(--tenue); background: var(--panel-alto);
+}
+.aviso.info    { border-left-color: var(--acento-sec); }
+.aviso.aviso   { border-left-color: var(--aviso); }
+.aviso.critico { border-left-color: var(--critico); }
+
+.lista { display: flex; flex-direction: column; gap: 7px; }
+
+.item {
+    display: flex; gap: 9px; align-items: flex-start;
+    padding: 9px 10px; border-radius: 8px;
+    background: var(--panel-alto); border: 1px solid var(--borde);
+    font-size: 12px; line-height: 1.45;
+}
+.item .icono { font-size: 13px; line-height: 1.2; }
+.item .dia {
+    font-size: 10px; color: var(--tenue); white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+.item.critico { border-color: #58282c; }
+.item.aviso   { border-color: #5a4a1d; }
+
+/* ---------- Tablas ---------- */
+.scroll { max-height: 340px; overflow: auto; margin-top: 8px; }
+
+.tabla { width: 100%; border-collapse: collapse; font-size: 12px; }
+.tabla th, .tabla td {
+    padding: 7px 9px; text-align: left;
+    border-bottom: 1px solid var(--borde);
+}
+.tabla th {
+    position: sticky; top: 0; background: var(--panel-alto);
+    color: var(--tenue); font-size: 10.5px; text-transform: uppercase;
+    letter-spacing: .6px; font-weight: 600;
+}
+.tabla td { color: var(--tinta); font-variant-numeric: tabular-nums; }
+.tabla tbody tr:hover { background: var(--panel-alto); }
+.tabla .acciones { display: flex; gap: 5px; }
+.tabla .acciones button { padding: 3px 7px; font-size: 11px; }
+
+/* ---------- Gráficas ---------- */
+.grafica { position: relative; }
+.grafica canvas { width: 100% !important; height: 200px !important; }
+.grafica.alto canvas { height: 300px !important; }
+.grafica.estrecha canvas { height: 220px !important; }
+
+/* ---------- Tarjetas A/B ---------- */
+.tarjetas { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
+
+.tarjeta {
+    background: var(--panel-alto); border: 1px solid var(--borde);
+    border-radius: 9px; padding: 13px;
+}
+.tarjeta.gana { border-color: var(--acento); }
+.tarjeta h4 {
+    font-size: 12px; color: var(--tinta-fuerte); margin-bottom: 3px;
+    display: flex; align-items: center; gap: 7px;
+}
+.tarjeta .marca {
+    width: 10px; height: 10px; border-radius: 3px; display: inline-block;
+}
+.tarjeta dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 10px;
+              font-size: 12px; margin-top: 9px; }
+.tarjeta dt { color: var(--tenue); }
+.tarjeta dd { text-align: right; color: var(--tinta-fuerte); font-variant-numeric: tabular-nums; }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1280px) {
+    #vista-simulador {
+        grid-template-columns: 260px minmax(0, 1fr);
+        grid-template-areas:
+            "config escena"
+            "kpis   escena"
+            "graficas graficas";
+    }
+    #col-kpis { max-height: none; }
+}
+
+@media (max-width: 900px) {
+    #vista-simulador {
+        grid-template-columns: 1fr;
+        grid-template-areas: "config" "escena" "kpis" "graficas";
+    }
+    #fila-graficas { grid-template-columns: 1fr; }
+    .tarjetas { grid-template-columns: 1fr; }
+    #barra { flex-wrap: wrap; }
+    #pestanas { margin-left: 0; width: 100%; overflow-x: auto; }
+}
+
+#slot-escena-comparar { margin: 12px 0; min-height: 360px; }
+#slot-escena-comparar #col-escena { height: 360px; }
+
+#ficha-especie { margin-bottom: 14px; }
+#formula-modelo { margin-bottom: 4px; }

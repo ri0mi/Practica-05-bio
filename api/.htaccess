@@ -1,0 +1,29 @@
+# ==========================================================================
+#  REESCRITURA DE RUTAS PARA LA API
+#  FlightPHP define rutas como "GET /especies", pero en el disco no existe
+#  ningún archivo con ese nombre. Sin esta regla, Apache contesta su propio
+#  404 y el frontend muestra "API sin conexión".
+#
+#  La regla dice: si lo pedido no es un archivo ni un directorio real,
+#  entrégaselo a index.php y deja que Flight decida qué ruta es.
+# ==========================================================================
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Sin RewriteBase a propósito: en un .htaccess las sustituciones se
+    # resuelven contra la carpeta donde está el archivo, así que "index.php"
+    # apunta a api/index.php sin importar de qué subcarpeta cuelgue el
+    # proyecto. Poner "RewriteBase /" lo mandaría a la raíz del servidor.
+
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ index.php [QSA,L]
+</IfModule>
+
+# El directorio vendor/ no se sirve nunca.
+<IfModule mod_authz_core.c>
+    <FilesMatch "\.(json|lock)$">
+        Require all denied
+    </FilesMatch>
+</IfModule>

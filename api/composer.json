@@ -1,0 +1,8 @@
+{
+    "name": "ricardo/practica05-bioinformatica",
+    "description": "API REST del Laboratorio Bioinformatico de Cultivo",
+    "require": {
+        "php": ">=7.4",
+        "flightphp/core": "^3.0"
+    }
+}

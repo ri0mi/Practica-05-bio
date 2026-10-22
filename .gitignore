@@ -1,0 +1,10 @@
+
+api/vendor/
+api/composer.phar
+Thumbs.db
+desktop.ini
+*.Zone.Identifier
+.vscode/
+.idea/
+*.sql.bak
+*.log
